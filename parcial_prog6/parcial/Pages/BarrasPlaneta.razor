@@ -1,0 +1,53 @@
+@page "/barrasPlanetas"
+
+<div>
+    <h1>Dias para dar 1 vuelta al Sol</h1>
+    0,1 segundos = 1 dia
+    @foreach (var planeta in planetas){
+        <div>
+            <h4>@planeta.Nombre</h4>
+            <span>Día @planeta.Contador de @planeta.DiasEnOrbita</span>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: @planeta.Porcentaje%">@planeta.Porcentaje%</div>
+            </div>
+        </div>
+        <br/>
+    }
+</div>
+
+@code {
+    private List<Planeta> planetas = new List<Planeta>{
+        new Planeta("Mercurio", 88),
+        new Planeta("Venus", 225),
+        new Planeta("Tierra", 365),
+        new Planeta("Marte", 687),
+        new Planeta("Jupiter", 4333)
+    };
+
+    public class Planeta{
+        
+        public string Nombre { get; set; }
+        public int DiasEnOrbita { get; set; }
+        public int Contador { get; set; }
+        public int Porcentaje => (int)(100 * (double)Contador / (double)DiasEnOrbita);
+
+        public Planeta(string nombre, int diasEnOrbita){//Constructor
+            Nombre = nombre;
+            DiasEnOrbita = diasEnOrbita;
+        }
+
+    }
+
+    protected override async Task OnInitializedAsync(){ //OnInitializedAsync arranca cuando inicializo la pagina
+        var tasks = planetas.Select(p => Loop(p)).ToArray();
+        await Task.WhenAll(tasks); //esto me asegura que espere a que todas las tareas finalicen
+    }
+
+    public async Task Loop(Planeta planeta){
+        while (planeta.Contador < planeta.DiasEnOrbita){
+            planeta.Contador++;
+            StateHasChanged(); //Funcion de blazor que avisa a blazor que debe actualizar la interfaz
+            await Task.Delay(10); //0,1 segundos por cada día
+        }
+    }
+}
